@@ -23,19 +23,13 @@ The image is recusively divided in tiles.
 
 ### Gosper Curve
 
-#### About the Gosper curve
-
  - [The Gosper curve on wikipedia](https://en.wikipedia.org/wiki/Gosper_curve)
  - [Fractalcurves.com: The Root 7 Family](http://www.fractalcurves.com/Root7.html)
  - [Space filling hexagon](https://spacefillingcurves.files.wordpress.com/2016/09/hex.jpg?w=662&h=221)
 
 ### Hilbert
 
-#### About the Hilbert curve
-
  - [The Hilbert curve on wikipedia](https://en.wikipedia.org/wiki/Hilbert_curve)
-
-#### Implementation
 
 The implementation is much more specific than the Gosper curve one, thus less elegant and more complicated.
 

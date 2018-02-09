@@ -1,7 +1,7 @@
 let parameters = {
-	nIterations: 7,
-	threshold: 0.0245,
-	margin: 0.2, // In proportion of the size of the squared image (length of one side)
+	nIterations: 9,
+	threshold: 0.03,
+	margin: 0.0, // In proportion of the size of the squared image (length of one side)
 	showImage: true,
 	type: 'hilbert',
 	exportSVG: ()=> {
@@ -23,9 +23,6 @@ let parameters = {
 	}
 }
 
-let debugStopAfterN = 3;
-let debugNStops = 0;
-
 let cornerIndexToName = ['bottomLeft', 'topLeft', 'topRight', 'bottomRight']
 
 var canvas = document.getElementById('canvas');
@@ -34,6 +31,7 @@ paper.setup(canvas);
 let raster = new paper.Raster('indien3.jpg');
 raster.on('load', rasterLoaded);
 let preview = null;
+let generatingText = null;
 
 let compoundPath = new paper.CompoundPath();
 compoundPath.strokeWidth = 0.5;
@@ -79,7 +77,7 @@ function gosper(rasters, nIterations, i, p1, p2, invert, container) {
 		let raster = rasters[n - 1]
 		let color = raster.getAverageColor(new paper.Path.Circle(raster.bounds.topLeft.add(centerImage), 1.5))
 	    let gray = color != null ? color.gray : -1
-	    // debugNStops++
+
 		if(1 - gray >= parameters.threshold) {
 
 			for(let j=0 ; j<deltas.length-1 ; j++) {
@@ -151,7 +149,36 @@ function hilbert(rasters, nIterations, i, x, y, px, py, quadrant, childNumber, r
 	}
 }
 
+function displayGeneratingAndDraw() {
+	if(generatingText == null) {
+		generatingText = new paper.Group()
+		let text = new paper.PointText({
+			point: paper.view.center,
+			content: 'Generating curve...',
+			fillColor: 'black',
+			fontFamily: 'Courier New',
+			fontSize: 25,
+			justification: 'center'
+		})
+		generatingText.addChild(text)
+		let textBackground = new paper.Path.Rectangle(text.bounds)
+		textBackground.fillColor = 'white'
+		generatingText.addChild(textBackground)
+		textBackground.sendToBack()
+	}
+	
+	generatingText.bringToFront()
+	generatingText.visible = true
+	setTimeout(()=> {
+		draw()
+	}, 250)
+}
+
 function draw() {
+	if(generatingText != null) {
+		generatingText.visible = false
+	}
+
 	compoundPath.removeChildren();
 
 	let rasterClone = raster.clone();
@@ -230,7 +257,7 @@ function rasterLoaded() {
 
 	preview.position = paper.view.bounds.topLeft.add(preview.bounds.size.multiply(0.5));
 	raster.remove();
-	draw();
+	displayGeneratingAndDraw();
 }
 
 function onDocumentDrag(event) {
@@ -261,17 +288,28 @@ document.addEventListener('dragleave', onDocumentDrag, false);
 
 var gui = new dat.GUI();
 
-gui.add(parameters, 'type', ['hilbert', 'gosper']).onFinishChange(()=> {
-	draw();
+gui.add(parameters, 'type', ['hilbert', 'gosper']).onFinishChange((value)=> {
+	if(value == 'hilbert') {
+		parameters.nIterations = 9
+		parameters.threshold = 0.03
+		parameters.margin = 0
+	} else if(value == 'gosper') {
+		parameters.nIterations = 9
+		parameters.threshold = 0.02455
+		parameters.margin = 0.2
+	}
+	gui.updateDisplay()
+	
+	displayGeneratingAndDraw();
 });
 gui.add(parameters, 'nIterations', 1, 10, 1).onFinishChange(()=> {
-	draw();
+	displayGeneratingAndDraw();
 });
 gui.add(parameters, 'threshold', 0, 1).onFinishChange(()=> {
-	draw();
+	displayGeneratingAndDraw();
 });
 gui.add(parameters, 'margin', 0, 1).onFinishChange(()=> {
-	draw();
+	displayGeneratingAndDraw();
 });
 gui.add(parameters, 'showImage').onFinishChange((value)=> {
 	if(preview != null) {
