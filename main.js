@@ -230,7 +230,7 @@ function hilbert(rasters, nIterations, i, x, y, px, py, quadrant, childNumber, r
     }
 
 
-	if(gray >= 0 && gray < 1 - parameters['threshold'+n]) {		
+	if(gray >= 0 && gray < 1 - parameters['threshold'+(n-1)]) {		
 
 		for(let j=0 ; j<4 ; j++) {
 			let q = quadrants[j];
@@ -311,45 +311,22 @@ function draw() {
 	compoundPath.removeChildren();
 
 	let scaledRaster = raster.clone();
+	let bigSize = 512;
+	scaledRaster.size = scaledRaster.width > scaledRaster.height ? new paper.Size(bigSize, bigSize * scaledRaster.height / scaledRaster.width) : new paper.Size(bigSize * scaledRaster.width / scaledRaster.height, bigSize)
 	scaledRaster.size = scaledRaster.size.multiply(parameters.scale)
-	let bigSize = 400;
 	let squareRaster = createWhiteRaster(bigSize, bigSize)
 	putRasterInRaster(scaledRaster, squareRaster, squareRaster.size.subtract(scaledRaster.size).divide(2).add(parameters.posX*squareRaster.width/2, parameters.posY*squareRaster.height/2))
 
 	scaledRaster.remove()
 	squareRaster.remove()
-	// scaledRaster.selected = true
-	// squareRaster.selected = true
-
-    // let ratio = rasterClone.width / rasterClone.height;
-    let nIterations = parameters.nIterations;
-    let power = parameters.type == 'hilbert' ? nIterations-1 : nIterations+1;
-    // let maxSize = Math.pow(2, power);
-    // let maxSizeMargin = maxSize / (1 + parameters.margin);
-
-    // if(rasterClone.width > rasterClone.height) {
-    //     rasterClone.height = maxSizeMargin;
-    //     rasterClone.width = rasterClone.height * ratio;
-    // } else {
-    //     rasterClone.width = maxSizeMargin;
-    //     rasterClone.height = rasterClone.width / ratio;
-    // }
-
-    // let subRaster = rasterClone.getSubRaster(new paper.Rectangle((rasterClone.width-maxSizeMargin)/2, (rasterClone.height-maxSizeMargin)/2, maxSizeMargin, maxSizeMargin));
-	// let squareRaster = bigRaster.getSubRaster(new paper.Rectangle((bigRaster.width-maxSizeMargin)/2, (bigRaster.height-maxSizeMargin)/2, maxSizeMargin, maxSizeMargin));
-
-	// let whiteCanvas = document.createElement("canvas");
-	// whiteCanvas.width = maxSize;
-	// whiteCanvas.height = maxSize;
-	// context = whiteCanvas.getContext('2d');
-	// context.beginPath();
-	// context.rect(0, 0, maxSize, maxSize);
-	// context.fillStyle = 'white';
-	// context.fill();
-	// let squareRaster = new paper.Raster(whiteCanvas);
-	// squareRaster.drawImage(subRaster.canvas, new paper.Size(maxSize / 2 - maxSizeMargin / 2));
-	// squareRaster.remove()
-	// bigRaster.remove()
+	
+	let nIterations = parameters.nIterations;
+	let power = parameters.type == 'hilbert' ? nIterations-1 : nIterations+1;
+	
+	if(parameters.type == 'hilbert') {
+		let maxSize = Math.pow(2, power);
+		squareRaster.size = new paper.Size(maxSize, maxSize)
+	}
 
     let r = squareRaster;
     let rasters = [r];
@@ -458,7 +435,7 @@ gui.add(parameters, 'color').onFinishChange(()=> {
 	displayGeneratingAndDraw();
 });
 
-gui.add(parameters, 'nIterations', 1, 10, 1).onFinishChange(()=> {
+gui.add(parameters, 'nIterations', 1, nThresholds, 1).onFinishChange(()=> {
 	displayGeneratingAndDraw();
 });
 
