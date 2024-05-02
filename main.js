@@ -8,7 +8,7 @@ let parameters = {
 	showImage: true,
 	color: false,
 	sortPath: false,
-	type: 'gosper',
+	type: 'hilbert',
 	exportJSON: ()=> {
 		let visible = preview.visible;
 		preview.visible = false;
@@ -356,7 +356,6 @@ function draw() {
 
     for(var i=0 ; i<nIterations-1 ; i++) {
         r = r.clone();
-		r.selected = false
         r.size = r.size.divide(2);
         rasters.push(r);
         r.visible = false;
