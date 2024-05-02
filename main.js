@@ -1,6 +1,6 @@
 let parameters = {
 	nIterations: 8,
-	threshold: 0.03,
+	globalThreshold: 0.03,
 	// margin: 0.0, // In proportion of the size of the squared image (length of one side)
 	scale: 1.0,
 	posX: 0.0,
@@ -77,8 +77,9 @@ let parameters = {
 	}
 }
 let nThresholds = 10
+
 for(let n=0 ; n<nThresholds ; n++) {
-	parameters['threshold'+n] = parameters.threshold
+	parameters['threshold'+n] = parameters.globalThreshold
 }
 
 const rgb_scale = 1;
@@ -229,7 +230,7 @@ function hilbert(rasters, nIterations, i, x, y, px, py, quadrant, childNumber, r
     }
 
 
-	if(gray >= 0 && gray < 1 - parameters.threshold) {		
+	if(gray >= 0 && gray < 1 - parameters['threshold'+n]) {		
 
 		for(let j=0 ; j<4 ; j++) {
 			let q = quadrants[j];
@@ -443,11 +444,11 @@ var gui = new dat.GUI();
 gui.add(parameters, 'type', ['hilbert', 'gosper']).onFinishChange((value)=> {
 	if(value == 'hilbert') {
 		parameters.nIterations = 9
-		parameters.threshold = 0.03
+		globalThresholdController.setValue(0.03)
 		parameters.margin = 0
 	} else if(value == 'gosper') {
 		parameters.nIterations = 8
-		parameters.threshold = 0.02455
+		globalThresholdController.setValue(0.02455)
 		parameters.margin = 0.2
 	}
 	gui.updateDisplay()
@@ -461,16 +462,19 @@ gui.add(parameters, 'color').onFinishChange(()=> {
 gui.add(parameters, 'nIterations', 1, 10, 1).onFinishChange(()=> {
 	displayGeneratingAndDraw();
 });
-gui.add(parameters, 'threshold', 0, 1).onFinishChange((value)=> {
+
+let thresholdControllers = []
+let globalThresholdController = gui.add(parameters, 'globalThreshold', 0, 1).onFinishChange((value)=> {
 	for(let n=0 ; n<nThresholds ; n++) {
 		parameters['threshold'+n] = value
+		thresholdControllers[n].setValue(value)
 	}
 	displayGeneratingAndDraw();
 });
 for(let n=0 ; n<nThresholds ; n++) {
-	gui.add(parameters, 'threshold'+n, 0, 1).onFinishChange(()=> {
+	thresholdControllers.push(gui.add(parameters, 'threshold'+n, 0, 1).onFinishChange(()=> {
 		displayGeneratingAndDraw();
-	});
+	}))
 }
 gui.add(parameters, 'scale', 0, 3, 0.01).onFinishChange(()=> {
 	displayGeneratingAndDraw();
