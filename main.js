@@ -26,7 +26,7 @@ let parameters = {
 		
 		let link = document.createElement("a");
 		document.body.appendChild(link);
-		link.download = 'indian.json';
+		link.download = 'drawing.json';
 		link.href = url;
 		link.click();
 		document.body.removeChild(link);
