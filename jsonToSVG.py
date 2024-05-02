@@ -1,4 +1,3 @@
-import random
 from pathlib import Path
 import json
 import argparse

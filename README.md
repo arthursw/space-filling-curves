@@ -6,6 +6,10 @@ A sort of artwork
 
 Drag'n'drop the image of your choice on the canvas to generate a hilbert or gosper curve version.
 
+## Installation
+
+Optionnaly create a virtual environment, then install the `jsonToSVG.py` dependencies with `pip install -r requirements.txt`.
+
 ## Usage
 
 Choose a curve type, drag-and-drop an image, choose some thresholds, and it will generate a curve. You can then export it with "exportJSON" and then use `jsonToSVG.py` to create an SVG drawing.

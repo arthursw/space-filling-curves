@@ -1,0 +1,2 @@
+scipy==1.11.3
+svgwrite==1.4.3
