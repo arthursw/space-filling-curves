@@ -6,6 +6,21 @@ A sort of artwork
 
 Drag'n'drop the image of your choice on the canvas to generate a hilbert or gosper curve version.
 
+## Usage
+
+Choose a curve type, drag-and-drop an image, choose some thresholds, and it will generate a curve. You can then export it with "exportJSON" and then use `jsonToSVG.py` to create an SVG drawing.
+
+Only Gosper curve can be colored.
+There is one threshold per iteration / level. The global threshold sets all other thresholds to the same value, it's just a shortcut.
+
+The lightness parameter enable to reduce the amount of black when in color mode. It does not have any effect in black and white mode. 
+
+You can choose the scale and position of the image, and hide / show the image which will be drawn.
+
+### Convert JSON to SVG
+
+Use `python jsonToSVG.py -i path/to/drawing.json` to create the corresponding `drawing.svg`. You can add a small margin around the drawing with the `--margin` option (in percentage of the max side of the drawing bounding box).
+
 ## How does it work?
 
 A [Space Filling Curve](https://en.wikipedia.org/wiki/Space-filling_curve) ([Hilbert curve](https://en.wikipedia.org/wiki/Hilbert_curve) or a [Gosper curve](https://en.wikipedia.org/wiki/Gosper_curve)) is computed from a grayscale image, refined where the image is darker than thredhold.

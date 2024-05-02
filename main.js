@@ -1,71 +1,29 @@
 let parameters = {
 	nIterations: 8,
 	globalThreshold: 0.03,
-	// margin: 0.0, // In proportion of the size of the squared image (length of one side)
 	scale: 1.0,
 	posX: 0.0,
 	posY: 0.0,
+	lightness: 0.5,
 	showImage: true,
 	color: false,
-	sortPath: false,
 	type: 'hilbert',
 	exportJSON: ()=> {
 		let visible = preview.visible;
 		preview.visible = false;
 		let path = []
-		if(parameters.sortPath) {
-			let cs = compoundPath.children.slice()
-			let firstChild = cs.shift()
-			let segments = firstChild.segments
-			path.push([segments[0].point.x, segments[0].point.y])
-			while(cs.length>0) {
-				for(let i=1 ; i<segments.length ; i++) {
-					path.push([segments[i].point.x, segments[i].point.y])
-				}
-				for(let i=0 ; i<cs.length ; i++) {
-					let child = cs[i]
-					if(child.firstSegment.point.isClose(path[path.length-1], 1e-6)) {
-						segments = child.segments
-						cs.splice(i, 1)
-						break
-					}
-					if(child.lastSegment.point.isClose(path[path.length-1], 1e-6)) {
-						segments = child.segments.toReversed()
-						cs.splice(i, 1)
-						break
-					}
-				}
-			}
-		} else {
 
-			for(let child of compoundPath.children) {
-				let p = []
-				for(let segment of child.segments) {
-					p.push([segment.point.x, segment.point.y])
-				}
-				path.push(p)
+		for(let child of compoundPath.children) {
+			let p = []
+			for(let segment of child.segments) {
+				p.push([segment.point.x, segment.point.y])
 			}
+			path.push(p)
 		}
-
-		// let n=1
-		// for(let p of path) {
-		// 	var text = new paper.PointText({
-		// 		point: p,
-		// 		content: ''+n,
-		// 		fillColor: 'black',
-		// 		fontFamily: 'Courier New',
-		// 		fontSize: 8
-		// 	});
-		// 	n++
-		// }
-
+		
 		let blob = new Blob([JSON.stringify(path)], {type: "application/json"})
 		let url  = URL.createObjectURL(blob)
 		
-		// let svg = paper.project.exportJSON( { asString: true });
-		// // create an svg image, create a link to download the image, and click it
-		// let blob = new Blob([svg], {type: 'image/svg+xml'});
-		// let url = URL.createObjectURL(blob);
 		let link = document.createElement("a");
 		document.body.appendChild(link);
 		link.download = 'indian.json';
@@ -119,11 +77,8 @@ raster.on('load', rasterLoaded);
 let preview = null;
 let generatingText = null;
 
-// let compoundPath = new paper.CompoundPath();
 let compoundPath = new paper.Layer();
 let topLayer = new paper.Layer();
-// compoundPath.strokeWidth = 0.5;
-// compoundPath.strokeColor = 'black';
 
 function gosper(rasters, nIterations, i, p1, p2, invert, container, channel='gray') {
 	n = nIterations - i
@@ -137,13 +92,6 @@ function gosper(rasters, nIterations, i, p1, p2, invert, container, channel='gra
 
 	let imageSize = rasters[n - 1].width
 	let centerImage = center.multiply(imageSize / container.width).floor()
-
-	// console.log('containerSize: ', containerSize)
-	// console.log('imageSize: ', imageSize, rasters[n-1].height)
-	// console.log('p1: ', p1)
-	// console.log('p2: ', p2)
-	// console.log('center: ', center)
-	// console.log('centerImage: ', centerImage)
 
     let direction = new paper.Point(2.5, Math.sqrt(3) / 2)
     let step = p1p2Length / direction.length
@@ -164,20 +112,14 @@ function gosper(rasters, nIterations, i, p1, p2, invert, container, channel='gra
 
 		let raster = rasters[n - 1]
 		let color = raster.getAverageColor(new paper.Path.Circle(raster.bounds.topLeft.add(centerImage), 1.5))
-	    // let gray = color != null ? color.gray : -1
+
 		let gray = color != null ? rgb_to_cmyk(color.red, color.green, color.blue)[channel] : -1
-
-		// if(Math.random()<0.01) {
-		// 	console.log(channel, gray)
-		// }
-
-		// if(1 - gray >= parameters.threshold) {
 		
-		// if((nIterations-n) < 4.0 * parameters.threshold * (1-gray) * nIterations) {
-		// if( gray < parameters.threshold * n / nIterations) {
-		// if( 1 - gray < parameters.threshold * n / nIterations ) {
+		if(channel == 'black' && parameters.color) {
+			gray *= parameters.lightness
+		}
+
 		if( 1 - gray < parameters['threshold'+n] ) {
-		// if( 1-gray < parameters.threshold ) {
 
 			for(let j=0 ; j<deltas.length-1 ; j++) {
 				let invert = deltas[j].invert
@@ -198,11 +140,6 @@ function gosper(rasters, nIterations, i, p1, p2, invert, container, channel='gra
 		path.add(d.point)
 	}
 
-	// let circle = new paper.Path.Circle(deltas[deltas.length-1].point, n*3)
-	// circle.strokeWidth = 0.8
-	// circle.strokeColor = 'black'
-	// circle.fillColor = null
-	// compoundPath.addChild(circle)
 }
 
 function hilbert(rasters, nIterations, i, x, y, px, py, quadrant, childNumber, rotation, oppositeDirection, inversion, margin, size) {
@@ -353,9 +290,7 @@ function draw() {
 	    let p4 = new paper.Point(maxContainerSize * (1 + Math.sqrt(3) / 2) / 2, 1 * maxContainerSize / 4)
 		let p5 = new paper.Point(maxContainerSize / 2, 0)
 		let p6 = new paper.Point(maxContainerSize * (1 - Math.sqrt(3) / 2) / 2, 1 * maxContainerSize / 4)
-		// let p3 = new paper.Point(p1.x, p2.y)
-		// let p4 = new paper.Point(p2.x, p1.y)
-		// gosper(rasters, nIterations, 1, p1, p2, false, container);
+
 		if(parameters.color) {
 			gosper(rasters, nIterations, 1, p1, p3, false, container, 'cyan');
 			gosper(rasters, nIterations, 1, p3, p5, false, container, 'magenta');
@@ -420,18 +355,26 @@ var gui = new dat.GUI();
 gui.add(parameters, 'type', ['hilbert', 'gosper']).onFinishChange((value)=> {
 	if(value == 'hilbert') {
 		parameters.nIterations = 9
-		globalThresholdController.setValue(0.03)
+		parameters.globalThreshold = 0.03
 		parameters.margin = 0
 	} else if(value == 'gosper') {
 		parameters.nIterations = 8
-		globalThresholdController.setValue(0.02455)
+		parameters.globalThreshold = 0.85
 		parameters.margin = 0.2
+	}
+	globalThresholdController.setValue(parameters.globalThreshold)
+	for(let n=0 ; n<nThresholds ; n++) {
+		parameters['threshold'+n] = parameters.globalThreshold
+		thresholdControllers[n].setValue(parameters.globalThreshold)
 	}
 	gui.updateDisplay()
 	
 	displayGeneratingAndDraw();
 });
 gui.add(parameters, 'color').onFinishChange(()=> {
+	displayGeneratingAndDraw();
+});
+gui.add(parameters, 'lightness', 0, 1, 0.01).onFinishChange(()=> {
 	displayGeneratingAndDraw();
 });
 
@@ -466,5 +409,4 @@ gui.add(parameters, 'showImage').onFinishChange((value)=> {
 		preview.visible = value;
 	}
 });
-gui.add(parameters, 'sortPath');
 gui.add(parameters, 'exportJSON');
