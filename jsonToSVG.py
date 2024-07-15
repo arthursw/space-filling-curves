@@ -76,7 +76,7 @@ while n<len(data):
 print('Created path.')
 data = finalData
 
-paperRatio = args.paperWidth / args.paperHeight
+paperRatio = (args.paperWidth - 2 * args.margin) / (args.paperHeight - 2 * args.margin)
 drawingRatio = width / height
 
 # if paperRatio > drawingRatio: # paper is wider compared to drawing: margin are defined vertically
@@ -98,7 +98,7 @@ if paperRatio > drawingRatio: # paper is wider compared to drawing: margin are d
     mmToUnit = height / (args.paperHeight - 2 * args.margin)
     marginV = args.margin * mmToUnit
     totalWidth = args.paperWidth * mmToUnit
-    marginH = (totalWidth - height) / 2
+    marginH = (totalWidth - width) / 2
 else: # paper is taller compared to drawing: margin are defined horizontally
     mmToUnit = width / (args.paperWidth - 2 * args.margin)
     marginH = args.margin * mmToUnit
